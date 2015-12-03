@@ -13,9 +13,14 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.FileChooser;
 import poker.app.MainApp;
+import pokerBase.Rule;
+import enums.eGame;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 /**
  * The controller for the root layout. The root layout provides the basic
@@ -34,6 +39,19 @@ public class RootLayoutController implements Initializable {
     
     @FXML
     private ToggleGroup tglGames;
+    
+    @FXML
+    private RadioMenuItem Omaha = new RadioMenuItem();
+    
+    @FXML
+    private RadioMenuItem Texas = new RadioMenuItem();
+    
+    @FXML
+    private RadioMenuItem fiveCardDraw = new RadioMenuItem();
+    
+    @FXML
+    private RadioMenuItem sevenCardDraw = new RadioMenuItem();
+    
     
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -73,6 +91,35 @@ public class RootLayoutController implements Initializable {
      * @param mainApp
      */
     public void setMainApp(MainApp mainApp) {
+    	fiveCardDraw.setToggleGroup(tglGames);
+    	Texas.setToggleGroup(tglGames);
+    	Omaha.setToggleGroup(tglGames);
+    	sevenCardDraw.setToggleGroup(tglGames);
+    	
+    	fiveCardDraw.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                PokerTableController.setRle(new Rule(eGame.FiveStud));
+            }
+        });
+    	
+    	Texas.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                PokerTableController.setRle(new Rule(eGame.TexasHoldEm));
+            }
+        });
+    	
+    	sevenCardDraw.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                PokerTableController.setRle(new Rule(eGame.SevenDraw));
+            }
+        });
+    	
+    	Omaha.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                PokerTableController.setRle(new Rule(eGame.Omaha));
+            }
+        });
+    	
         this.mainApp = mainApp;
     }
 

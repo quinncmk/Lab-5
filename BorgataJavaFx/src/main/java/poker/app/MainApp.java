@@ -48,7 +48,7 @@ public class MainApp extends Application {
 		tbl = new Table();
 		
 		BorderPane root = new BorderPane();
-		Scene scene = new Scene(root, 400, 400);
+		Scene scene = new Scene(root, 1000, 600);
 
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle("Poker");

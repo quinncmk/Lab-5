@@ -3,6 +3,8 @@ package poker.app.view;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import org.apache.commons.math3.util.Combinations;
@@ -138,6 +140,16 @@ public class PokerTableController {
 
 	@FXML
 	public Button btnPlay;
+	
+	private long legnthOfTransition = 300;
+	
+	private Timer timer;
+	
+	private static Rule rle = new Rule(eGame.Omaha);
+	
+	public static void setRle(Rule rle) {
+		PokerTableController.rle = rle;
+	}
 
 	private eGameState eGameState;
 
@@ -260,7 +272,6 @@ public class PokerTableController {
 		HboxCommunityCards.getChildren().clear();
 
 		// Get the Rule, start the Game
-		Rule rle = new Rule(eGame.Omaha);
 		gme = new GamePlay(rle);
 
 		// Add the seated players to the game, create a GPPH for the player
@@ -406,8 +417,16 @@ public class PokerTableController {
 				BestPlayerHands.add(hBestHand);
 			}
 
-			Hand WinningHand = Hand.PickBestHand(BestPlayerHands);
-			Player WinningPlayer = (Player) hsPlayerHand.get(WinningHand);
+			final Hand WinningHand = Hand.PickBestHand(BestPlayerHands);
+			final Player WinningPlayer = (Player) hsPlayerHand.get(WinningHand);
+			
+			Timer timer = new Timer();
+			timer.schedule(new TimerTask() {
+				  @Override
+				  public void run() {
+					  winning(WinningHand, WinningPlayer);
+				  }
+				}, ((long)mainApp.GetSeatedPlayers().size() * legnthOfTransition));
 			
 			if (WinningPlayer.getiPlayerPosition() == 1) {
 				String strCard = "/res/img/winner.png";
@@ -461,7 +480,61 @@ public class PokerTableController {
 		}
 
 	}
-
+	
+	private void winning(Hand winningHand, Player p) {
+		GamePlayPlayerHand gpph = gme.FindPlayerGame(gme, p);
+		Hand playerHand = gpph.getHand();
+		Hand communityCard = gme.FindCommonHand(gme).getHand();
+		HBox playerBox = null;
+		if(p.getiPlayerPosition() == 1) {
+			playerBox = hBoxP1Cards;
+		} else if(p.getiPlayerPosition() == 2) {
+			playerBox = hBoxP2Cards;
+		} else if(p.getiPlayerPosition() == 3) {
+			playerBox = hBoxP3Cards;
+		} else if(p.getiPlayerPosition() == 4) {
+			playerBox = hBoxP4Cards;
+		}
+		
+		
+		for(int i = 0; i < winningHand.getCardsInHand().size(); i++) {
+			for(int h = 0; h < playerHand.getCardsInHand().size(); h++) {
+				if(winningHand.GetCardFromHand(i) == playerHand.GetCardFromHand(h)) {
+					ImageView winningCard = (ImageView)playerBox.getChildren().get(h);
+					TranslateTransition translateTransition = new TranslateTransition(Duration.millis(300), winningCard);
+					translateTransition.setFromX(0);
+					translateTransition.setToX(0);
+					translateTransition.setFromY(0);
+					translateTransition.setToY(-10);
+					translateTransition.setCycleCount(1);
+					translateTransition.setAutoReverse(false);
+					translateTransition.play();
+				} else {
+					
+				}
+			}
+		}
+		
+		if(rle.GetCommunityCardsCount() > 0) {
+			for(int i = 0; i < winningHand.getCardsInHand().size(); i++) {
+				for(int h = 0; h < communityCard.getCardsInHand().size(); h++) {
+					if(winningHand.GetCardFromHand(i) == communityCard.GetCardFromHand(h)) {
+						ImageView winningCard = (ImageView)HboxCommunityCards.getChildren().get(h);
+						TranslateTransition translateTransition = new TranslateTransition(Duration.millis(300), winningCard);
+						translateTransition.setFromX(0);
+						translateTransition.setToX(0);
+						translateTransition.setFromY(0);
+						translateTransition.setToY(-10);
+						translateTransition.setCycleCount(1);
+						translateTransition.setAutoReverse(false);
+						translateTransition.play();
+					} else {
+						
+					}
+				}
+			}
+		}
+	}
 	private SequentialTransition CalculateTransition(Card c, HBox PlayerCardBox, ImageView imView, int iCardDrawn) {
 		// This is the card that is going to be dealt to the player.
 		String strCard = "/res/img/" + c.getCardImg();
